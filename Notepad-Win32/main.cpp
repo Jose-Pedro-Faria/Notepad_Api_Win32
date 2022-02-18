@@ -1,6 +1,9 @@
 #include <windows.h>
 
-int Notepad WinMain(HINSTANCE hInst , HINSTANCE hPrevInst, LPSTR args, int ncmdshow)
+int WINAPI WinMain(HINSTANCE hInst , HINSTANCE hPrevInst, LPSTR args, int ncmdshow)
 {
+    MessageBox(NULL, "Olá", "O meu Notepad", MB_OK);
 
+
+    return 0;
 }
