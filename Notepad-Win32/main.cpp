@@ -30,7 +30,7 @@ int WINAPI WinMain(HINSTANCE hInst , HINSTANCE hPrevInst, LPSTR args,int ncmdsho
     if (!RegisterClassW(&wc))                       //Registar Class
         return -1;
 
-    hMainWindow = CreateWindowW(L"WindowClass", L"Notepad do Faria", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 600,300,1000,600,NULL,NULL,NULL,NULL);
+    hMainWindow = CreateWindowW(L"WindowClass", L"Notepad do Faria", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 600,300,430,400,NULL,NULL,NULL,NULL);
 
     MSG msg = {0};
 
