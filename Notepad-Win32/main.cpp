@@ -1,17 +1,18 @@
 #include <windows.h>
+#include <stdio.h>
 
-#define FILE_MENU_NOVO 1
-#define FILE_MENU_ABRIR 2
-#define FILE_MENU_SAIR 3
-#define CHANGE_TITLE 4
+//#define FILE_MENU_NOVO 1
+//#define FILE_MENU_ABRIR 2
+//#define FILE_MENU_SAIR 3
+#define OPEN_FILE_BUTTON 1
 
 LRESULT CALLBACK WindowsProcedure(HWND,UINT,WPARAM,LPARAM);
 
-void AddMenus(HWND);            //declaração função adicionar menus
+//void AddMenus(HWND);            //declaração função adicionar menus
 void AddControls(HWND);         //declaração função adicionar controlos
 
-HMENU hMenu;
-HWND hEdit;
+//HMENU hMenu;
+HWND hMainWindow,hEdit;
 
 //---- Função principal ----
 
@@ -28,7 +29,7 @@ int WINAPI WinMain(HINSTANCE hInst , HINSTANCE hPrevInst, LPSTR args,int ncmdsho
     if (!RegisterClassW(&wc))                       //Registar Class
         return -1;
 
-    CreateWindowW(L"WindowClass", L"Notepad do Faria", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 600,300,1000,600,NULL,NULL,NULL,NULL);
+    hMainWindow = CreateWindowW(L"WindowClass", L"Notepad do Faria", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 600,300,1000,600,NULL,NULL,NULL,NULL);
 
     MSG msg = {0};
 
@@ -36,11 +37,44 @@ int WINAPI WinMain(HINSTANCE hInst , HINSTANCE hPrevInst, LPSTR args,int ncmdsho
     {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
-    }
-
-
+    }   //fim while
     return 0;
 }   //fim main
+
+void display_file(char* path)
+{
+    FILE *file;
+    file = fopen(path,"rb");
+    fseek(file,0,SEEK_END);
+    int _size = ftell(file);
+    rewind(file);
+    char *data = new char[_size+1];
+    fread(data,_size,1,file);
+    data[_size] = '\0';
+
+    //SetWindowText(hEdit,data);
+}
+
+void open_file(HWND hWnd)
+{
+    OPENFILENAME ofn;
+
+    char file_name[100];
+
+    ZeroMemory(&ofn,sizeof(OPENFILENAME));
+
+    ofn.lStructSize = sizeof(OPENFILENAME);
+    ofn.hwndOwner = hWnd;
+    ofn.lpstrFile = file_name;
+    ofn.lpstrFile [0] = '\0';
+    ofn.nMaxFile = 100;
+    ofn.lpstrFile = "All files\0*.*\0Source Files\0*.CPP\0Text Files\0*.TXT\0";
+    ofn.nFilterIndex = 1;
+
+    GetOpenFileName(&ofn);
+
+    display_file(ofn.lpstrFile);
+}
 
 LRESULT CALLBACK WindowsProcedure(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 {
@@ -49,23 +83,13 @@ LRESULT CALLBACK WindowsProcedure(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
     case WM_COMMAND:
         switch(wp)
         {
-        case FILE_MENU_SAIR:
-            DestroyWindow(hWnd);        //Se alguem clicar "Sair" a janela fecha e a aplicação encerra
+        case OPEN_FILE_BUTTON:
+            open_file(hWnd);
             break;
-        case FILE_MENU_NOVO:
-            break;
-        case FILE_MENU_ABRIR:
-            break;
-        case CHANGE_TITLE:
-            wchar_t texto[100];
-            GetWindowTextW(hEdit,texto,100);
-            SetWindowTextW(hWnd,texto);
-            break;
-        }   //fim switch(p)
+        }   //fim switch(wp)
         break;
 
     case WM_CREATE:
-        AddMenus(hWnd);
         AddControls(hWnd);
         break;
 
@@ -75,10 +99,10 @@ LRESULT CALLBACK WindowsProcedure(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 
     default:
         return DefWindowProcW(hWnd,msg,wp,lp);
-    }
+    }   //fim switch(msg)
 }   //fim WindowsProcesure
 
-
+/*
 void AddMenus(HWND hWnd)         //Função criar menu "taskbar"
 {
     hMenu = CreateMenu();
@@ -100,15 +124,13 @@ void AddMenus(HWND hWnd)         //Função criar menu "taskbar"
 
     SetMenu(hWnd, hMenu);
 }
-
+*/
 
 void AddControls(HWND hWnd)          //Função para adicionar controlos
 {
-    CreateWindowW(L"Static",L"Introduzir texto aqui: ",WS_VISIBLE | WS_CHILD | WS_BORDER |SS_CENTER, 200,100,100,50,hWnd,NULL,NULL,NULL);       //
+    CreateWindowW(L"Static",L"Abrir Ficheiro", WS_VISIBLE | WS_CHILD,10,10,150,36,hWnd,(HMENU)OPEN_FILE_BUTTON,NULL,NULL);
 
-    hEdit = CreateWindowW(L"Edit",L"",WS_VISIBLE | WS_CHILD | WS_BORDER | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL,
-                          200,152,100,50,hWnd,NULL,NULL,NULL);                                                                                  //Caixa de texto para escrever
-
-    CreateWindowW(L"Button",L"Change Title", WS_VISIBLE | WS_CHILD, 200,204,100,50,hWnd,(HMENU)CHANGE_TITLE,NULL,NULL);
+    hEdit = CreateWindowW(L"Edit",L"",WS_VISIBLE | WS_CHILD | ES_MULTILINE | WS_BORDER | ES_AUTOHSCROLL | ES_AUTOVSCROLL,
+                          10,50,400,300,hWnd,NULL,NULL,NULL);
 }
 
