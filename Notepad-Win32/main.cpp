@@ -5,6 +5,7 @@
 //#define FILE_MENU_ABRIR 2
 //#define FILE_MENU_SAIR 3
 #define OPEN_FILE_BUTTON 1
+#define SAVE_FILE_BUTTON 2
 
 LRESULT CALLBACK WindowsProcedure(HWND,UINT,WPARAM,LPARAM);
 
@@ -52,7 +53,9 @@ void display_file(char* path)
     fread(data,_size,1,file);
     data[_size] = '\0';
 
-    //SetWindowText(hEdit,data);
+    SetWindowText(hEdit,data);
+
+    fclose(file);
 }
 
 void open_file(HWND hWnd)
@@ -68,7 +71,9 @@ void open_file(HWND hWnd)
     ofn.lpstrFile = file_name;
     ofn.lpstrFile [0] = '\0';
     ofn.nMaxFile = 100;
-    ofn.lpstrFile = "All files\0*.*\0Source Files\0*.CPP\0Text Files\0*.TXT\0";
+    ofn.lpstrFilter = "All files\0*.*\0Source Files\0*.CPP\0Text Files\0*.TXT\0";
+    //ofn.lpstrFile = "All Files\0*.*\0Source Files\0*.CPP\0Python Files\0*.PY\0Text Files\0*.TXT\0";
+
     ofn.nFilterIndex = 1;
 
     GetOpenFileName(&ofn);
@@ -76,17 +81,59 @@ void open_file(HWND hWnd)
     display_file(ofn.lpstrFile);
 }
 
+void write_file(char* path)
+{
+    FILE *file;
+    file = fopen(path,"w");             //"w" modo escrita
+
+    int _size = GetWindowTextLength(hEdit);        //retorna o tamanho do texto na EditBox
+    char *data = new char[_size+1];
+    GetWindowText(hEdit, data,_size+1);
+
+    fwrite(data,_size+1,1,file);
+    fclose(file);
+}
+
+void save_file(HWND hWnd)
+{
+    OPENFILENAME ofn;
+
+    char file_name[100];
+
+    ZeroMemory(&ofn,sizeof(OPENFILENAME));
+
+    ofn.lStructSize = sizeof(OPENFILENAME);
+    ofn.hwndOwner = hWnd;
+    ofn.lpstrFile = file_name;
+    ofn.lpstrFile [0] = '\0';
+    ofn.nMaxFile = 100;
+    ofn.lpstrFilter = "All files\0*.*\0Source Files\0*.CPP\0Text Files\0*.TXT\0";
+    //ofn.lpstrFile = "All Files\0*.*\0Source Files\0*.CPP\0Python Files\0*.PY\0Text Files\0*.TXT\0";
+
+    ofn.nFilterIndex = 1;
+
+    GetSaveFileName(&ofn);
+
+    write_file(ofn.lpstrFile);
+}
+
 LRESULT CALLBACK WindowsProcedure(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 {
     switch (msg)
     {
     case WM_COMMAND:
-        switch(wp)
         {
-        case OPEN_FILE_BUTTON:
-            open_file(hWnd);
-            break;
-        }   //fim switch(wp)
+            switch(wp)
+            {
+            case OPEN_FILE_BUTTON:
+                open_file(hWnd);
+                break;
+            case SAVE_FILE_BUTTON:
+                save_file(hWnd);
+                break;
+            }   //fim switch(wp)
+        }
+
         break;
 
     case WM_CREATE:
@@ -128,9 +175,11 @@ void AddMenus(HWND hWnd)         //Função criar menu "taskbar"
 
 void AddControls(HWND hWnd)          //Função para adicionar controlos
 {
-    CreateWindowW(L"Static",L"Abrir Ficheiro", WS_VISIBLE | WS_CHILD,10,10,150,36,hWnd,(HMENU)OPEN_FILE_BUTTON,NULL,NULL);
+    CreateWindowW(L"Button",L"Abrir Ficheiro", WS_VISIBLE | WS_CHILD,10,10,150,36,hWnd,(HMENU)OPEN_FILE_BUTTON,NULL,NULL);
 
-    hEdit = CreateWindowW(L"Edit",L"",WS_VISIBLE | WS_CHILD | ES_MULTILINE | WS_BORDER | ES_AUTOHSCROLL | ES_AUTOVSCROLL,
+    CreateWindowW(L"Button",L"Guardar Ficheiro", WS_VISIBLE | WS_CHILD,170,10,150,36,hWnd,(HMENU)SAVE_FILE_BUTTON,NULL,NULL);
+
+    hEdit = CreateWindowW(L"Edit",L"",WS_VISIBLE | WS_CHILD | ES_MULTILINE | WS_BORDER | WS_VSCROLL | WS_HSCROLL,
                           10,50,400,300,hWnd,NULL,NULL,NULL);
 }
 
