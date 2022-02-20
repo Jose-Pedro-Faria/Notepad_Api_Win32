@@ -85,7 +85,7 @@ void AddMenus(HWND hWnd)         //Função criar menu "taskbar"
     HMENU hFileMenu = CreateMenu();         //Criar Menu
     HMENU hSubMenu = CreateMenu();          //Criar SubMenu
 
-    AppendMenu(hSubMenu,MF_STRING,CHANGE_TITLE,"Mudar Título");
+    AppendMenu(hSubMenu,MF_STRING,NULL,"SubMenu");
 
     AppendMenu(hFileMenu,MF_STRING,FILE_MENU_NOVO,"Novo");          //SubMenu de File -> Menu NOVO
     AppendMenu(hFileMenu,MF_POPUP,(UINT_PTR)hSubMenu,"Abrir");      //SubMenu de File -> Menu Abrir -> com submenu SubMenu
@@ -108,5 +108,7 @@ void AddControls(HWND hWnd)          //Função para adicionar controlos
 
     hEdit = CreateWindowW(L"Edit",L"",WS_VISIBLE | WS_CHILD | WS_BORDER | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL,
                           200,152,100,50,hWnd,NULL,NULL,NULL);                                                                                  //Caixa de texto para escrever
+
+    CreateWindowW(L"Button",L"Change Title", WS_VISIBLE | WS_CHILD, 200,204,100,50,hWnd,(HMENU)CHANGE_TITLE,NULL,NULL);
 }
 
